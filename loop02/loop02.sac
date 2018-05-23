@@ -1,0 +1,102 @@
+/********************************************************************************
+ *
+ * Livermoore Loop no 2s (sequential)
+ *
+ * ICCG Excerpt (Incomplete Cholesky - Conjugate Gradient)
+ * Sequential Algorithm
+ * 
+ ********************************************************************************/
+
+use StdIO: all;
+use Array: all;
+use RTimer: all;
+
+
+#ifndef VARIANT
+#define VARIANT C
+#endif
+
+#define APPEND(v) Loop2_ ## v
+#define FULL(v) APPEND(v)
+#define LOOP FULL( VARIANT)
+
+#define STR(s) #s
+#define STRING(s) STR(s)
+
+
+#ifndef SIZE
+#define SIZE 1001
+#endif
+
+/*
+ * il, k, and i are changed exactly the way it is done in the Sisal implementation.
+ * However, since in Sac indexing starts with 0 rather than 1, all indices are 
+ * decremented by 1!
+ */
+
+double[.] Loop2_C( int n, double[SIZE] v, double[SIZE] x)
+{
+  ipntp = 0;
+  ii = n;
+  
+  do {
+    ipnt = ipntp;
+    ipntp += ii;
+    ii /= 2;
+    i = ipntp -1;
+    for( k=ipnt+1; k < ipntp; k+=2) {
+      i++;
+      x[i] = x[[k]] - v[[k]] * x[[k-1]] + v[[k+1]] * x[[k+1]];
+    }
+  } while (ii >0);
+
+  return( x);
+}
+
+
+inline double[.] genArray(int size)
+{
+  A = tod( 1 + iota(size));
+  return(A);
+}
+
+int main()
+{
+  double[SIZE] v;
+
+  timer = createRTimer();
+
+  rep = (int) FibreScanIntArray();
+  n   = SIZE / 2;
+
+  v = genArray(SIZE);
+  x = v;
+  
+  printf( "Running " STRING( LOOP) "\n");
+  printf( "Number of repetitions: %d\n", rep);
+  printf( "Vector length        : %d\n", SIZE);
+  printf( "Initial chunk (n)    : %d\n", n);
+
+  startRTimer( timer);
+  for( i = 0; i<rep; i++) {
+    x = LOOP( n, v, x);
+  }
+  stopRTimer( timer);
+
+  printf( "The first element is : %f\n", x[0]);
+
+  numFlops = 0.0;
+  ii=n;
+  do {
+    ii /= 2;
+    numFlops += tod((ii-1)/2)*4.0;
+  } while (ii>0);
+
+  numFlops *= tod(rep);
+
+  printf( "Wall Clock Time spent           : %6.3f secs\n", getRTimerDbl( timer));
+  printf( "Computer performance achieved   : %6.2f GFlops\n", (tod(numFlops)/1000000000.0) / getRTimerDbl( timer));
+
+  return(0);
+}
+

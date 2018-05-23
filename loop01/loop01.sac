@@ -1,0 +1,101 @@
+/*******************************************************************************
+ *
+ * Livermore Loop no 1
+ *
+ * Hydro Fragment
+ * Parallel Algorithm
+ *
+ *  We have to ensure that the loop is "different" each iteration,
+ *  so introduce the variable nolir.
+ *
+ * 3. Similar changes have been made to the C version of loop01.
+ *
+ *******************************************************************************/
+
+use StdIO: all;
+use Array: all;
+use RTimer: all;
+
+
+#ifndef VARIANT
+#define VARIANT TC
+#endif
+
+#define APPEND(v) Loop1_ ## v
+#define FULL(v) APPEND(v)
+#define LOOP FULL( VARIANT)
+
+#define STR(s) #s
+#define STRING(s) STR(s)
+
+
+#ifndef SIZE
+#define SIZE 1001
+#endif
+
+double[.] Loop1_APL(int nolir, int n, double q, double r, double t, 
+                        double[SIZE] y, double[SIZE] z)
+{
+  n = _max_SxS_( n, 0);  /* See if this helps */
+  n = _min_SxS_( n, 990);
+
+  val =  ( q + ( take([n], y) * ( r * take( [n], drop( [10], z))
+                               + t * take( [n], drop( [11], z))))) ++ genarray( [11], tod(nolir));
+  return(val);
+}
+
+double[.] Loop1_TC( int nolir, int n, double q, double r, double t,
+                    double[SIZE] y, double[SIZE] z)
+{
+  return with {
+           ( [0] <= [k] < [n]) : q + y[k] * (r*z[k+10] + t*z[k+11]);
+         } : genarray( [1001], tod(nolir));
+}
+
+
+inline double[.] genArray(int size)
+{
+  A = tod( 1 + iota(size));
+  return(A);
+}
+
+
+int main ()
+{
+  double[ SIZE] y;
+
+  timer = createRTimer();
+
+  rep = (int) FibreScanIntArray();             /* 500000 */
+
+  n = SIZE - 11;
+  q = 1.6;
+  r = 9.4;
+  t = 5.8;
+  y = genArray( SIZE);
+  z = y;
+  x = y;
+
+  printf( "Running " STRING( LOOP) "\n");
+  printf( "Number of repetitions: %d\n", rep);
+  printf( "Vector length        : %d\n", SIZE);
+  printf( "Upper limit (n)      : %d\n", n);
+
+  startRTimer( timer);
+  noLir = 0.0;
+  for (i=0; i<rep; i++){
+    x = LOOP( i, n, q, r, t, y, z);
+    noLir += x[0];
+  }
+  stopRTimer( timer);
+
+  printf( "The sum of the first element is : %f\n", noLir);
+
+  numFlops = tod(rep)*tod(n)*5.0;
+
+  printf( "Wall Clock Time spent           : %6.3f secs\n", getRTimerDbl( timer));
+  printf( "Computer Performance achieved   : %6.2f GFlops\n", (tod(numFlops)/1000000000.0) / getRTimerDbl( timer));
+  
+  return( 0);
+}
+
