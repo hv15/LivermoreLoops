@@ -1,0 +1,3 @@
+_n: -DVARIANT=N
+_apl: -DVARIANT=APL
+_tc: -DVARIANT=TC
