@@ -59,8 +59,8 @@ inline
 double[*] condense( int[.] factors, double[*] a)
 {
   res = with {
-          ( . <= iv <= .) : a[factors*iv];
-        } : genarray( shape(a) / factors, 0d);
+          ( . <= iv < shape(a)/factors) : a[factors*iv];
+        } : genarray( shape(a), 0d);
   return res;
 }
 
@@ -84,8 +84,8 @@ double[.] Loop4_APL2(int m, int n, double[SIZE] x, double[SIZE] y)
   chunk = n/5;
   for( k=6; k<SIZE; k+=m) {
     tmp = x[k-1];
-    tmp -= sum( take( [chunk], shift([6-k], x)) *
-                take( [chunk], condense( [5], shift( [-4], y))));
+    tmp -= sum( take( [chunk], shift([6-k], x) *
+                               condense( [5], shift( [-4], y))));
     x[k-1] = y[4] * tmp;
   }
   return(x);
