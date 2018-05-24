@@ -12,7 +12,7 @@ use RTimer: all;
 
 
 #ifndef VARIANT
-#define VARIANT APL
+#define VARIANT NAIVE
 #endif
 
 #define APPEND(v) Loop4_ ## v
@@ -27,6 +27,7 @@ use RTimer: all;
 #define SIZE 1001
 #endif
 
+inline
 double[.] Loop4_C( int m, int n, double[SIZE] x, double[SIZE] y)
 {
   for( k=6; k<SIZE; k+=m) {
@@ -41,61 +42,71 @@ double[.] Loop4_C( int m, int n, double[SIZE] x, double[SIZE] y)
   return x;
 }
 
-double[.] Loop4_N( int m, int n, double[SIZE] x, double[SIZE] y)
+inline
+double[.] Loop4_NAIVE( int m, int n, double[SIZE] x, double[SIZE] y)
 {
-  x = with {
-        ([5] <= [k] < [SIZE-1] step [m]) {
-          tmp = x[k];
-          tmp -= with {
-                   ( [0] <= [j] < [n/5]) : x[j+k-6] * y[4+5*j];
-                 } : fold( +, 0d);
-        } : y[4] * tmp;
-      } : modarray( x);
+  for( k=6; k<SIZE; k+=m) {
+    tmp = x[k-1];
+    tmp -= with {
+             ( [0] <= [j] < [n/5]) : x[j+k-6] * y[4+5*j];
+           } : fold( +, 0d);
+    x[k-1] = y[4] * tmp;
+  }
   return x;
 }
 
-double Loop4_APL(int m, int n, double[SIZE] x, double[SIZE] y)
+inline
+double[*] condense( int[.] factors, double[*] a)
+{
+  res = with {
+          ( . <= iv <= .) : a[factors*iv];
+        } : genarray( shape(a) / factors, 0d);
+  return res;
+}
+
+
+inline
+double[.] Loop4_APL(int m, int n, double[SIZE] x, double[SIZE] y)
 {
   chunk = n/5;
-  x = with {
-        ([5] <= [k] < [SIZE-1] step [m]) {
-          tmp = x[k];
-          tmp -= sum( take( [chunk], drop([k-6], x)) *
+  for( k=6; k<SIZE; k+=m) {
+    tmp = x[k-1];
+    tmp -= sum( take( [chunk], drop([k-6], x)) *
                       take( [chunk], condense( [5], drop( [4], y))));
-        } : y[4] * tmp;
-      } : modarray( x);
+    x[k-1] = y[4] * tmp;
+  }
+  return(x);
+}
+
+inline
+double[.] Loop4_APL2(int m, int n, double[SIZE] x, double[SIZE] y)
+{
+  chunk = n/5;
+  for( k=6; k<SIZE; k+=m) {
+    tmp = x[k-1];
+    tmp -= sum( take( [chunk], shift([6-k], x)) *
+                take( [chunk], condense( [5], shift( [-4], y))));
+    x[k-1] = y[4] * tmp;
+  }
   return(x);
 }
 
 inline double BandedIp( int[+] offset, int from, int to, double[+] x, double[+] y)
 {
   band_mult = with {
-                ( [from] <= iv <= [to] ) : ( x[ (offset-6) + iv ] * y[5*iv - 1] );
+                ( [from] <= [j] <= [to] ) : ( x[ (offset-6) + j ] * y[5*j - 1] );
               } : fold( +, 0d );
 
   return( band_mult);
 }
 
-double[.] Loop4_G( int m, int n, double[SIZE] x, double[SIZE] y)
+inline
+double[.] Loop4_GENERIC( int m, int n, double[SIZE] x, double[SIZE] y)
 {
-  steps = n / 5;
-
-  if( steps < 6 ) {
-    t1 = x[[5]]   - BandedIp( [5], 1, steps, x, y);
-    t2 = x[[502]] - BandedIp( [502], 1, steps, x, y);
-    t3 = x[[999]] - BandedIp( [999], 1, steps, x, y);
-  } else {
-    t1 = ( (1d-y[[29]]) * ( x[[5]] - BandedIp( [5], 1, 5, x, y)) )
-         - BandedIp( [5], 7, steps, x, y);
-    t2 = ( (1d-y[[29]]) * ( x[[502]] - BandedIp( [502], 1, 5, x, y)) )
-         - BandedIp( [502], 7, steps, x, y);
-    t3 = ( (1d-y[[29]]) * ( x[[999]] - BandedIp( [999], 1, 5, x, y)) )
-         - BandedIp( [999], 7, steps, x, y);
+  chunk = n / 5;
+  for( k=6; k<SIZE; k+=m) {
+    x[[k-1]] = y[[4]] * (x[[k-1]]   - BandedIp( [k-1], 1, chunk, x, y));
   }
-
-  x[[5]] = t1 * y[[4]];
-  x[[502]] = t2 * y[[4]];
-  x[[999]] = t3 * y[[4]];
 
   return(x);
 }
@@ -104,7 +115,7 @@ double[.] Loop4_G( int m, int n, double[SIZE] x, double[SIZE] y)
 
 inline double[.] genArray(int size)
 {
-  A = tod( 1 + iota(size));
+  A = 1d / tod( 1 + iota(size));
   return(A);
 }
 
@@ -115,16 +126,17 @@ int main ()
 
   timer = createRTimer();
 
-  rep = (int) FibreScanIntArray();             /* 500000 */
+  rep = (int) FibreScanIntArray();
+  n = (int) FibreScanIntArray();
 
   m = (SIZE-7)/2;
-  n = SIZE;
   x = genArray( SIZE);
   y = x;
 
   printf( "Running " STRING( LOOP) "\n");
   printf( "Number of repetitions: %d\n", rep);
   printf( "Vector length        : %d\n", SIZE);
+  printf( "Upper limit (n)      : %d\n", n);
 
   startRTimer( timer);
   noLir = 0.0;
@@ -133,12 +145,12 @@ int main ()
   }
   stopRTimer( timer);
 
-  printf( "The first element of the result is : %f\n", x[0]);
+  printf( "Element [5] of the result is : %f\n", x[5]);
 
-  numFlops = tod(rep)*tod((n-6)/m)*tod((n-4)/5)*2.0;
+  numFlops = tod(rep)*tod((SIZE-6)/m)*tod((n-4)/5)*2.0;
 
-  printf( "Wall Clock Time spent           : %6.3f secs\n", getRTimerDbl( timer));
-  printf( "Computer Performance achieved   : %6.2f GFlops\n", (tod(numFlops)/1000000000.0) / getRTimerDbl( timer));
+  printf( "Wall Clock Time spent           : %7.3f secs\n", getRTimerDbl( timer));
+  printf( "Computer Performance achieved   : %7.3f GFlops/s\n", (tod(numFlops)/1000000000.0) / getRTimerDbl( timer));
   
   return( 0);
 }
