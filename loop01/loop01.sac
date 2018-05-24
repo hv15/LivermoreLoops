@@ -18,7 +18,7 @@ use RTimer: all;
 
 
 #ifndef VARIANT
-#define VARIANT TC
+#define VARIANT APL2
 #endif
 
 #define APPEND(v) Loop1_ ## v
@@ -33,23 +33,39 @@ use RTimer: all;
 #define SIZE 1001
 #endif
 
-double[.] Loop1_APL(int nolir, int n, double q, double r, double t, 
+/*
+ * Note here, that the use of nolir differs in the different variants!
+ * However, since this is artificial for enabling repetitive calls to
+ * the loop function, we are happy to ignore that as long as it only afects
+ * the values between x[n] and x[SIZE-1]!
+ */
+double[.] Loop1_APL1(int nolir, int n, double q, double r, double t, 
                         double[SIZE] y, double[SIZE] z)
 {
-  n = _max_SxS_( n, 0);  /* See if this helps */
-  n = _min_SxS_( n, 990);
-
   val =  ( q + ( take([n], y) * ( r * take( [n], drop( [10], z))
                                + t * take( [n], drop( [11], z))))) ++ genarray( [11], tod(nolir));
   return(val);
 }
 
-double[.] Loop1_TC( int nolir, int n, double q, double r, double t,
+double[.] Loop1_APL2(int nolir, int n, double q, double r, double t,
+                        double[SIZE] y, double[SIZE] z)
+{
+  return q + y * ( r * shift( [-10], tod(nolir), z) + t * shift( [-11], tod(nolir), z));
+}
+
+double[.] Loop1_TC1( int nolir, int n, double q, double r, double t,
                     double[SIZE] y, double[SIZE] z)
 {
   return with {
            ( [0] <= [k] < [n]) : q + y[k] * (r*z[k+10] + t*z[k+11]);
          } : genarray( [1001], tod(nolir));
+}
+
+double[.] Loop1_TC2( int nolir, int n, double q, double r, double t,
+                    double[SIZE] y, double[SIZE] z)
+{
+  return { k -> q + y[k] * (r * shift( [-10], tod(nolir), z)[k]
+                            + t*shift( [-11], tod(nolir), z)[k]) };
 }
 
 
