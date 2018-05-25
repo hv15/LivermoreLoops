@@ -1,0 +1,81 @@
+/*******************************************************************************
+ *
+ * Livermore Loop no 5
+ *
+ * Tri-Diangonal Elimination, Below Diagonal
+ * Sequential Algorithm
+ *
+ *******************************************************************************/
+
+use StdIO: all;
+use Array: all;
+use RTimer: all;
+
+
+#ifndef VARIANT
+#define VARIANT C
+#endif
+
+#define APPEND(v) Loop5_ ## v
+#define FULL(v) APPEND(v)
+#define LOOP FULL( VARIANT)
+
+#define STR(s) #s
+#define STRING(s) STR(s)
+
+
+#ifndef SIZE
+#define SIZE 1001
+#endif
+
+inline
+double[.] Loop5_C( int n, double[SIZE] x, double[SIZE] y, double[SIZE] z)
+{
+  for( i=1; i< n; i++) {
+    x[[i]] = z[[i]] * ( y[[i]] - x[[i-1]]);
+  }
+  return x;
+}
+
+
+inline double[.] genArray(int size)
+{
+  A = 1d / tod( 1 + iota(size));
+  return(A);
+}
+
+
+int main ()
+{
+  double[ SIZE] x;
+
+  timer = createRTimer();
+
+  rep = (int) FibreScanIntArray();
+  n = SIZE;
+
+  x = genArray( SIZE);
+  y = x;
+  z = x;
+
+  printf( "Running " STRING( LOOP) "\n");
+  printf( "Number of repetitions: %d\n", rep);
+  printf( "Vector length (n)    : %d\n", SIZE);
+
+  startRTimer( timer);
+  noLir = 0.0;
+  for (i=0; i<rep; i++){
+    x = LOOP( n, x, y, z);
+  }
+  stopRTimer( timer);
+
+  printf( "Element [1] of the result is : %f\n", x[1]);
+
+  numFlops = tod(rep)*tod(SIZE-1)*2.0;
+
+  printf( "Wall Clock Time spent           : %7.3f secs\n", getRTimerDbl( timer));
+  printf( "Computer Performance achieved   : %7.3f GFlops/s\n", (tod(numFlops)/1000000000.0) / getRTimerDbl( timer));
+  
+  return( 0);
+}
+
