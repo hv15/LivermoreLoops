@@ -1,0 +1,117 @@
+/*******************************************************************************
+ *
+ * Livermore Loop no 7
+ *
+ * equation of state fragment
+ *
+ *******************************************************************************/
+
+use StdIO: all;
+use Array: all;
+use RTimer: all;
+
+
+#ifndef VARIANT
+#define VARIANT C
+#endif
+
+#define APPEND(v) Loop7_ ## v
+#define FULL(v) APPEND(v)
+#define LOOP FULL( VARIANT)
+
+#define STR(s) #s
+#define STRING(s) STR(s)
+
+
+#ifndef SIZE
+#define SIZE 1001
+#endif
+
+#ifndef SIZE2
+#define SIZE2 64
+#endif
+
+inline
+double[.] Loop7_C( int n, double r, double t, double[SIZE] u, double[SIZE] y, double[SIZE] z)
+{
+  x = y;
+  for( k=0 ; k<n ; k++ ) {
+    x[k] = u[k] + r*( z[k] + r*y[k] ) +
+           t*( u[k+3] + r*( u[k+2] + r*u[k+1] ) +
+           t*( u[k+6] + r*( u[k+5] + r*u[k+4] ) ) );
+  }
+  return x;
+}
+
+inline
+double[.] Loop7_NAIVE( int n, double r, double t, double[SIZE] u, double[SIZE] y, double[SIZE] z)
+{
+  x = with {
+       (. <= k < [n]) : u[k] + r*( z[k] + r*y[k] ) +
+                        t*( u[k+3] + r*( u[k+2] + r*u[k+1] ) +
+                        t*( u[k+6] + r*( u[k+5] + r*u[k+4] ) ) );
+      } : genarray( [SIZE], 0d);
+  return x;
+}
+
+
+inline
+double[.] Loop7_TC( int n, double r, double t, double[SIZE] u, double[SIZE] y, double[SIZE] z)
+{
+  return { k -> u[k] + r*( z[k] + r*y[k] ) +
+                t*( shift([-3],u)[k] + r*( shift([-2],u)[k] + r*shift([-1],u)[k] ) +
+                t*( shift([-6],u)[k] + r*( shift([-5],u)[k] + r*shift([-4],u)[k] ) ) ) };
+}
+
+inline
+double[.] Loop7_APL( int n, double r, double t, double[SIZE] u, double[SIZE] y, double[SIZE] z)
+{
+  return u + r*(z+r*y) + t*( shift([-3],u) + r*(shift([-2],u) + r*shift([-1],u))
+                       + t*( shift([-6],u) + r*(shift([-5],u) + r*shift([-4],u))));
+}
+
+
+inline double[.] genArray(int size)
+{
+  A = 1d / tod( 1 + iota(size));
+  return(A);
+}
+
+
+int main ()
+{
+  double[ SIZE] w;
+  double[ SIZE2, SIZE2] b;
+
+  timer = createRTimer();
+
+  rep = (int) FibreScanIntArray();
+  n = SIZE-6;
+  r = 0.99999;
+  t = 0.75;
+
+  u = genArray( SIZE);
+  y = u;
+  z = u;
+
+  printf( "Running " STRING( LOOP) "\n");
+  printf( "Number of repetitions: %d\n", rep);
+  printf( "Iteration space size : %d\n", n);
+
+  startRTimer( timer);
+  noLir = 0.0;
+  for (i=0; i<rep; i++){
+    y = LOOP( n, r, t, u, y, z);
+  }
+  stopRTimer( timer);
+
+  printf( "Element [1] of the result is : %f\n", y[1]);
+
+  numFlops = tod(rep)*tod(n)*tod(16);
+
+  printf( "Wall Clock Time spent           : %7.3f secs\n", getRTimerDbl( timer));
+  printf( "Computer Performance achieved   : %7.3f GFlops/s\n", (tod(numFlops)/1000000000.0) / getRTimerDbl( timer));
+  
+  return( 0);
+}
+
