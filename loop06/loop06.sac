@@ -36,7 +36,7 @@ double[.] Loop6_C( int n, double[SIZE] w, double[SIZE2,SIZE2] b)
 {
   for( i=1 ; i<n ; i++ ) {
     for ( k=0 ; k<i ; k++ ) {
-      w[i] += b[k,i] * w[(i-k)-1];
+      w[i] += b[i,k] * w[(i-k)-1];
     }
   }
   return w;
@@ -48,7 +48,7 @@ double[.] Loop6_NAIVE( int n, double[SIZE] w, double[SIZE2,SIZE2] b)
   for( i=1; i< n; i++) {
 
     v = with {
-          ( [0] <= [k] < [i] ) : b[[i,k]] * w[[i-(k+1)]];
+          ( [0] <= [k] < [i] ) : b[[i,k]] * w[[(i-k)-1]];
         } : fold( +, 0d );
 
     w[[i]] = w[[i]] + v;
@@ -61,7 +61,18 @@ inline
 double[.] Loop6_TC( int n, double[SIZE] w, double[SIZE2,SIZE2] b)
 {
   for( i=1; i< n; i++) {
-    w[i] += sum( { [k]-> b[[i,k]]*w[[i-(k+1)]] });
+    w[i] += sum( with { 
+                   ([0] <= [k] <[i]) : b[[i,k]] * w[[(i-k)-1]];
+                 } : genarray([i], 0d) );
+  }
+  return w;
+}
+
+inline
+double[.] Loop6_APL( int n, double[SIZE] w, double[SIZE2,SIZE2] b)
+{
+  for( i=1; i< n; i++) {
+    w[i] += sum( b[[i]] * take( [SIZE2], reverse( shift( [SIZE-i], w))));
   }
   return w;
 }
@@ -85,11 +96,11 @@ int main ()
   n = SIZE2;
 
   w = genArray( SIZE);
-  b = rehshape( [SIZE2,SIZE2], genArray(SIZE2*SIZE2);
+  b = reshape( [SIZE2,SIZE2], genArray(SIZE2*SIZE2));
 
   printf( "Running " STRING( LOOP) "\n");
   printf( "Number of repetitions: %d\n", rep);
-  printf( "Vector length (n)    : %d\n", SIZE);
+  printf( "Vector length (n)    : %d\n", n);
 
   startRTimer( timer);
   noLir = 0.0;
@@ -100,7 +111,7 @@ int main ()
 
   printf( "Element [1] of the result is : %f\n", w[1]);
 
-  numFlops = tod(rep)*tod(n)*2.0;
+  numFlops = tod(rep)*tod(n*(n+1));
 
   printf( "Wall Clock Time spent           : %7.3f secs\n", getRTimerDbl( timer));
   printf( "Computer Performance achieved   : %7.3f GFlops/s\n", (tod(numFlops)/1000000000.0) / getRTimerDbl( timer));
