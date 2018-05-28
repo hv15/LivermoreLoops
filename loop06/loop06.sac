@@ -1,0 +1,110 @@
+/*******************************************************************************
+ *
+ * Livermore Loop no 6
+ *
+ * general linear recurrence equations
+ *
+ *******************************************************************************/
+
+use StdIO: all;
+use Array: all;
+use RTimer: all;
+
+
+#ifndef VARIANT
+#define VARIANT C
+#endif
+
+#define APPEND(v) Loop6_ ## v
+#define FULL(v) APPEND(v)
+#define LOOP FULL( VARIANT)
+
+#define STR(s) #s
+#define STRING(s) STR(s)
+
+
+#ifndef SIZE
+#define SIZE 1001
+#endif
+
+#ifndef SIZE2
+#define SIZE2 64
+#endif
+
+inline
+double[.] Loop6_C( int n, double[SIZE] w, double[SIZE2,SIZE2] b)
+{
+  for( i=1 ; i<n ; i++ ) {
+    for ( k=0 ; k<i ; k++ ) {
+      w[i] += b[k,i] * w[(i-k)-1];
+    }
+  }
+  return w;
+}
+
+inline
+double[.] Loop6_NAIVE( int n, double[SIZE] w, double[SIZE2,SIZE2] b)
+{
+  for( i=1; i< n; i++) {
+
+    v = with {
+          ( [0] <= [k] < [i] ) : b[[i,k]] * w[[i-(k+1)]];
+        } : fold( +, 0d );
+
+    w[[i]] = w[[i]] + v;
+  }
+  return w;
+}
+
+
+inline
+double[.] Loop6_TC( int n, double[SIZE] w, double[SIZE2,SIZE2] b)
+{
+  for( i=1; i< n; i++) {
+    w[i] += sum( { [k]-> b[[i,k]]*w[[i-(k+1)]] });
+  }
+  return w;
+}
+
+
+inline double[.] genArray(int size)
+{
+  A = 1d / tod( 1 + iota(size));
+  return(A);
+}
+
+
+int main ()
+{
+  double[ SIZE] w;
+  double[ SIZE2, SIZE2] b;
+
+  timer = createRTimer();
+
+  rep = (int) FibreScanIntArray();
+  n = SIZE2;
+
+  w = genArray( SIZE);
+  b = rehshape( [SIZE2,SIZE2], genArray(SIZE2*SIZE2);
+
+  printf( "Running " STRING( LOOP) "\n");
+  printf( "Number of repetitions: %d\n", rep);
+  printf( "Vector length (n)    : %d\n", SIZE);
+
+  startRTimer( timer);
+  noLir = 0.0;
+  for (i=0; i<rep; i++){
+    w = LOOP( n, w, b);
+  }
+  stopRTimer( timer);
+
+  printf( "Element [1] of the result is : %f\n", w[1]);
+
+  numFlops = tod(rep)*tod(n)*2.0;
+
+  printf( "Wall Clock Time spent           : %7.3f secs\n", getRTimerDbl( timer));
+  printf( "Computer Performance achieved   : %7.3f GFlops/s\n", (tod(numFlops)/1000000000.0) / getRTimerDbl( timer));
+  
+  return( 0);
+}
+
