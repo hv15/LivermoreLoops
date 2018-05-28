@@ -9,6 +9,7 @@ SET (DLL_BUILD_DIR  "${PROJECT_BINARY_DIR}/lib")
 SET (TARGETS            seq mt_pth  CACHE STRING "Build stdlib-jpeg for these targets")
 SET (SAC2C_EXEC                     CACHE STRING "A path to sac2c compiler")
 SET (LINKSETSIZE        "0"         CACHE STRING "Set a value for -linksetsize parameter of sac2c")
+SET (EXTRA_FLAGS                    CACHE STRING "Provide a list of extra flags")
 
 # Check whether sac2c is operational
 INCLUDE ("cmake-common/check-sac2c.cmake")
@@ -16,7 +17,7 @@ INCLUDE ("cmake-common/misc-macros.cmake")
 
 # The old Makefile had SAC2CFLAGS set to "-O3 -v1 -maxlur 3"
 # We port -O3 and -maxlur 3, but we use -v0
-SET (SAC2C_DEF_FLAGS -v0 -O3 -maxlur 3 -linksetsize ${LINKSETSIZE} -L ${DLL_BUILD_DIR} -T ${DLL_BUILD_DIR})
+SET (SAC2C_DEF_FLAGS -v0 -O3 -maxlur 3 -linksetsize ${LINKSETSIZE} -L ${DLL_BUILD_DIR} -T ${DLL_BUILD_DIR} ${EXTRA_FLAGS})
 
 # For every target run CMakeLists.txt in src
 FOREACH (TARGET IN ITEMS ${TARGETS})
