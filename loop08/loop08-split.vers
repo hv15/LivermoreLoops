@@ -1,0 +1,4 @@
+_c       : -DVARIANT=C
+_naive   : -DVARIANT=NAIVE
+_naive2  : -DVARIANT=NAIVE2
+_apl     : -DVARIANT=APL

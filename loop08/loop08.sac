@@ -74,6 +74,102 @@ Loop8_C( int n, double[10] consts, double[SIZE0,SIZE1,SIZE2] u1,
 
 inline
 double[.,.,.], double[.,.,.], double[.,.,.]
+Loop8_NAIVE( int n, double[10] consts, double[SIZE0,SIZE1,SIZE2] u1,
+                                       double[SIZE0,SIZE1,SIZE2] u2,
+                                       double[SIZE0,SIZE1,SIZE2] u3)
+{
+
+  a11=consts[0];
+  a12=consts[1];
+  a13=consts[2];
+  a21=consts[3];
+  a22=consts[4];
+  a23=consts[5];
+  a31=consts[6];
+  a32=consts[7];
+  a33=consts[8];
+  sig=consts[9];
+  nl1 = 0;
+  nl2 = 1;
+
+  du1 = with {
+          (. <= [ky,kx] <= .) : u1[nl1,ky+2,kx+1] - u1[nl1,ky,kx+1];
+        } : genarray( [n-1,2], 0d);
+  du2 = with {
+          (. <= [ky,kx] <= .) : u2[nl1,ky+2,kx+1] - u2[nl1,ky,kx+1];
+        } : genarray( [n-1,2], 0d);
+  du3 = with {
+          (. <= [ky,kx] <= .) : u3[nl1,ky+2,kx+1] - u3[nl1,ky,kx+1];
+        } : genarray( [n-1,2], 0d);
+  u1 = with {
+         ([nl2,1,1] <= [kz,ky,kx] < [nl2+1,n,3]) 
+         : u1[nl1,ky,kx]+a11*du1[ky-1,kx-1]+a12*du2[ky-1,kx-1]+a13*du3[ky-1,kx-1] + sig*
+                     (u1[nl1,ky,kx+1]-2.0*u1[nl1,ky,kx]+u1[nl1,ky,kx-1]);
+       } : modarray( u1);
+  u2 = with {
+         ([nl2,1,1] <= [kz,ky,kx] < [nl2+1,n,3]) 
+         : u2[nl1,ky,kx]+a21*du1[ky-1,kx-1]+a22*du2[ky-1,kx-1]+a23*du3[ky-1,kx-1] + sig*
+                     (u2[nl1,ky,kx+1]-2.0*u2[nl1,ky,kx]+u2[nl1,ky,kx-1]);
+       } : modarray( u2);
+  u3 = with {
+         ([nl2,1,1] <= [kz,ky,kx] < [nl2+1,n,3]) 
+         : u3[nl1,ky,kx]+a31*du1[ky-1,kx-1]+a32*du2[ky-1,kx-1]+a33*du3[ky-1,kx-1] + sig*
+                     (u3[nl1,ky,kx+1]-2.0*u3[nl1,ky,kx]+u3[nl1,ky,kx-1]);
+       } : modarray( u3);
+  return (u1,u2,u3);
+}
+
+inline
+double[.,.,.], double[.,.,.], double[.,.,.]
+Loop8_NAIVE2( int n, double[10] consts, double[SIZE0,SIZE1,SIZE2] u1,
+                                        double[SIZE0,SIZE1,SIZE2] u2,
+                                        double[SIZE0,SIZE1,SIZE2] u3)
+{
+
+  a11=consts[0];
+  a12=consts[1];
+  a13=consts[2];
+  a21=consts[3];
+  a22=consts[4];
+  a23=consts[5];
+  a31=consts[6];
+  a32=consts[7];
+  a33=consts[8];
+  sig=consts[9];
+  nl1 = 0;
+  nl2 = 1;
+
+  for ( kx=1 ; kx<3 ; kx++ ){
+    du1 = with {
+            (. <= [ky] <= .) : u1[nl1,ky+2,kx] - u1[nl1,ky,kx];
+          } : genarray( [n-1], 0d);
+    du2 = with {
+            (. <= [ky] <= .) : u2[nl1,ky+2,kx] - u2[nl1,ky,kx];
+          } : genarray( [n-1], 0d);
+    du3 = with {
+            (. <= [ky] <= .) : u3[nl1,ky+2,kx] - u3[nl1,ky,kx];
+          } : genarray( [n-1], 0d);
+    u1 = with {
+           ([nl2,1,kx] <= [kz,ky,kx] < [nl2+1,n,kx+1])
+           : u1[nl1,ky,kx]+a11*du1[ky-1]+a12*du2[ky-1]+a13*du3[ky-1] + sig*
+                       (u1[nl1,ky,kx+1]-2.0*u1[nl1,ky,kx]+u1[nl1,ky,kx-1]);
+         } : modarray( u1);
+    u2 = with {
+           ([nl2,1,kx] <= [kz,ky,kx] < [nl2+1,n,kx+1])
+           : u2[nl1,ky,kx]+a21*du1[ky-1]+a22*du2[ky-1]+a23*du3[ky-1] + sig*
+                       (u2[nl1,ky,kx+1]-2.0*u2[nl1,ky,kx]+u2[nl1,ky,kx-1]);
+         } : modarray( u2);
+    u3 = with {
+           ([nl2,1,kx] <= [kz,ky,kx] < [nl2+1,n,kx+1])
+           : u3[nl1,ky,kx]+a31*du1[ky-1]+a32*du2[ky-1]+a33*du3[ky-1] + sig*
+                       (u3[nl1,ky,kx+1]-2.0*u3[nl1,ky,kx]+u3[nl1,ky,kx-1]);
+         } : modarray( u3);
+  }
+  return (u1,u2,u3);
+}
+
+inline
+double[.,.,.], double[.,.,.], double[.,.,.]
 Loop8_APL( int n, double[10] consts, double[SIZE0,SIZE1,SIZE2] u1,
                                      double[SIZE0,SIZE1,SIZE2] u2,
                                      double[SIZE0,SIZE1,SIZE2] u3)
@@ -90,10 +186,15 @@ Loop8_APL( int n, double[10] consts, double[SIZE0,SIZE1,SIZE2] u1,
   sig=consts[9];
   nl1 = 0;
   nl2 = 1;
+
   du1 = shift([0,-1,0], u1) - shift([0,1,0], u1);
   du2 = shift([0,-1,0], u2) - shift([0,1,0], u2);
   du3 = shift([0,-1,0], u3) - shift([0,1,0], u3);
 
+  /*
+   * Note here that we compute over the entire 5 elements in the thirdaxis , rather than
+   * only the two above....
+   */
   u1[nl2] = u1[nl1] + a11*du1[nl1] + a12*du2[nl1] + a13*du3[nl1] 
             + sig * ( shift( [0,0,-1], u1)[nl1] - 2.0*u1[nl1] + shift( [0,0,1], u1)[nl1]);
   u2[nl2] = u2[nl1] + a21*du1[nl1] + a22*du2[nl1] + a23*du3[nl1] 
@@ -103,6 +204,48 @@ Loop8_APL( int n, double[10] consts, double[SIZE0,SIZE1,SIZE2] u1,
 
   return (u1,u2,u3);
 }
+
+inline
+double[.,.,.], double[.,.,.], double[.,.,.]
+Loop8_APL2( int n, double[10] consts, double[SIZE0,SIZE1,SIZE2] u1,
+                                      double[SIZE0,SIZE1,SIZE2] u2,
+                                      double[SIZE0,SIZE1,SIZE2] u3)
+{
+  a11=consts[0];
+  a12=consts[1];
+  a13=consts[2];
+  a21=consts[3];
+  a22=consts[4];
+  a23=consts[5];
+  a31=consts[6];
+  a32=consts[7];
+  a33=consts[8];
+  sig=consts[9];
+  nl1 = 0;
+  nl2 = 1;
+
+  u1p = u1[nl1];
+  u2p = u2[nl1];
+  u3p = u3[nl1];
+
+  du1 = shift([-1,0], u1p) - shift([1,0], u1p);
+  du2 = shift([-1,0], u2p) - shift([1,0], u2p);
+  du3 = shift([-1,0], u3p) - shift([1,0], u3p);
+
+  /*
+   * Note here that we compute over the entire 5 elements in the thirdaxis , rather than
+   * only the two above....
+   */
+  u1[nl2] = u1p + a11*du1 + a12*du2 + a13*du3
+            + sig * ( shift( [0,-1], u1p) - 2.0*u1p + shift( [0,1], u1p));
+  u2[nl2] = u2p + a21*du1 + a22*du2 + a23*du3
+            + sig * ( shift( [0,-1], u2p) - 2.0*u2p + shift( [0,1], u2p));
+  u3[nl2] = u3p + a31*du1 + a32*du2 + a33*du3
+            + sig * ( shift( [0,-1], u3p) - 2.0*u3p + shift( [0,1], u3p));
+
+  return (u1,u2,u3);
+}
+
 inline double[.] genArray(int size)
 {
   A = tod( 1 + iota(size));
