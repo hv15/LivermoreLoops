@@ -1,5 +1,5 @@
 # LivermoreLoops
-Sac implementations of the Livermore Loop benchmarks
+SaC implementations of the Livermore Loop benchmarks
 
 Building programs require operational sac2c and sac4c as well as CMake at least version 3.3.
 
@@ -16,6 +16,9 @@ $ make -j5
 Compiled files will be available under `build` directory, under corresponding
 sub-directories.  Each directory will be build for `seq` and `mt_pth` targets,
 appending the name of the target to the name of the directory.
+
+Additional flags for CMake:
+- `-DINLINE=` - inline all loop functions (default: 'NO')
 
 ## Benchmarks
 

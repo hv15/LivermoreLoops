@@ -15,6 +15,12 @@ use RTimer: all;
 #define VARIANT APL
 #endif
 
+#ifndef INLINE
+#define LL_INLINE
+#else
+#define LL_INLINE inline
+#endif
+
 #define APPEND(v) Loop3_ ## v
 #define FULL(v) APPEND(v)
 #define LOOP FULL( VARIANT)
@@ -31,6 +37,7 @@ use RTimer: all;
  * Note here, that the addition of nolir is artificial. It enables 
  * repetitive calls to the loop function to be actually executed.
  */
+LL_INLINE
 double Loop3_N(int nolir, int n, double[SIZE] z, double[SIZE] x)
 {
   val =  with {
@@ -39,11 +46,13 @@ double Loop3_N(int nolir, int n, double[SIZE] z, double[SIZE] x)
   return tod(nolir) + val;
 }
 
+LL_INLINE
 double Loop3_APL(int nolir, int n, double[SIZE] z, double[SIZE] x)
 {
   return tod(nolir) + sum( z*x);
 }
 
+LL_INLINE
 double Loop3_TC( int nolir, int n, double[SIZE] z, double[SIZE] x)
 {
   return tod(nolir) + sum( { iv -> z[iv] * x[iv] });

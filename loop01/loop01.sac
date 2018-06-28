@@ -21,6 +21,12 @@ use RTimer: all;
 #define VARIANT APL2
 #endif
 
+#ifndef INLINE
+#define LL_INLINE
+#else
+#define LL_INLINE inline
+#endif
+
 #define APPEND(v) Loop1_ ## v
 #define FULL(v) APPEND(v)
 #define LOOP FULL( VARIANT)
@@ -39,6 +45,7 @@ use RTimer: all;
  * the loop function, we are happy to ignore that as long as it only afects
  * the values between x[n] and x[SIZE-1]!
  */
+LL_INLINE
 double[.] Loop1_APL1(int nolir, int n, double q, double r, double t, 
                         double[SIZE] y, double[SIZE] z)
 {
@@ -47,12 +54,14 @@ double[.] Loop1_APL1(int nolir, int n, double q, double r, double t,
   return(val);
 }
 
+LL_INLINE
 double[.] Loop1_APL2(int nolir, int n, double q, double r, double t,
                         double[SIZE] y, double[SIZE] z)
 {
   return q + y * ( r * shift( [-10], tod(nolir), z) + t * shift( [-11], tod(nolir), z));
 }
 
+LL_INLINE
 double[.] Loop1_TC1( int nolir, int n, double q, double r, double t,
                     double[SIZE] y, double[SIZE] z)
 {
@@ -61,6 +70,7 @@ double[.] Loop1_TC1( int nolir, int n, double q, double r, double t,
          } : genarray( [1001], tod(nolir));
 }
 
+LL_INLINE
 double[.] Loop1_TC2( int nolir, int n, double q, double r, double t,
                     double[SIZE] y, double[SIZE] z)
 {

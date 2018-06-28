@@ -15,6 +15,12 @@ use RTimer: all;
 #define VARIANT NAIVE
 #endif
 
+#ifndef INLINE
+#define LL_INLINE
+#else
+#define LL_INLINE inline
+#endif
+
 #define APPEND(v) Loop4_ ## v
 #define FULL(v) APPEND(v)
 #define LOOP FULL( VARIANT)
@@ -27,7 +33,7 @@ use RTimer: all;
 #define SIZE 1001
 #endif
 
-inline
+LL_INLINE
 double[.] Loop4_C( int m, int n, double[SIZE] x, double[SIZE] y)
 {
   for( k=6; k<SIZE; k+=m) {
@@ -42,7 +48,7 @@ double[.] Loop4_C( int m, int n, double[SIZE] x, double[SIZE] y)
   return x;
 }
 
-inline
+LL_INLINE
 double[.] Loop4_NAIVE( int m, int n, double[SIZE] x, double[SIZE] y)
 {
   for( k=6; k<SIZE; k+=m) {
@@ -65,7 +71,7 @@ double[*] condense( int[.] factors, double[*] a)
 }
 
 
-inline
+LL_INLINE
 double[.] Loop4_APL(int m, int n, double[SIZE] x, double[SIZE] y)
 {
   chunk = n/5;
@@ -78,7 +84,7 @@ double[.] Loop4_APL(int m, int n, double[SIZE] x, double[SIZE] y)
   return(x);
 }
 
-inline
+LL_INLINE
 double[.] Loop4_APL2(int m, int n, double[SIZE] x, double[SIZE] y)
 {
   chunk = n/5;
@@ -100,7 +106,7 @@ inline double BandedIp( int[+] offset, int from, int to, double[+] x, double[+] 
   return( band_mult);
 }
 
-inline
+LL_INLINE
 double[.] Loop4_GENERIC( int m, int n, double[SIZE] x, double[SIZE] y)
 {
   chunk = n / 5;

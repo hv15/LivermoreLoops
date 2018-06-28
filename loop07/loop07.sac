@@ -15,6 +15,12 @@ use RTimer: all;
 #define VARIANT C
 #endif
 
+#ifndef INLINE
+#define LL_INLINE
+#else
+#define LL_INLINE inline
+#endif
+
 #define APPEND(v) Loop7_ ## v
 #define FULL(v) APPEND(v)
 #define LOOP FULL( VARIANT)
@@ -31,7 +37,7 @@ use RTimer: all;
 #define SIZE2 64
 #endif
 
-inline
+LL_INLINE
 double[.] Loop7_C( int n, double r, double t, double[SIZE] u, double[SIZE] y, double[SIZE] z)
 {
   x = y;
@@ -43,7 +49,7 @@ double[.] Loop7_C( int n, double r, double t, double[SIZE] u, double[SIZE] y, do
   return x;
 }
 
-inline
+LL_INLINE
 double[.] Loop7_NAIVE( int n, double r, double t, double[SIZE] u, double[SIZE] y, double[SIZE] z)
 {
   x = with {
@@ -54,8 +60,7 @@ double[.] Loop7_NAIVE( int n, double r, double t, double[SIZE] u, double[SIZE] y
   return x;
 }
 
-
-inline
+LL_INLINE
 double[.] Loop7_TC( int n, double r, double t, double[SIZE] u, double[SIZE] y, double[SIZE] z)
 {
   return { k -> u[k] + r*( z[k] + r*y[k] ) +
@@ -63,7 +68,7 @@ double[.] Loop7_TC( int n, double r, double t, double[SIZE] u, double[SIZE] y, d
                 t*( shift([-6],u)[k] + r*( shift([-5],u)[k] + r*shift([-4],u)[k] ) ) ) };
 }
 
-inline
+LL_INLINE
 double[.] Loop7_APL( int n, double r, double t, double[SIZE] u, double[SIZE] y, double[SIZE] z)
 {
   return u + r*(z+r*y) + t*( shift([-3],u) + r*(shift([-2],u) + r*shift([-1],u))

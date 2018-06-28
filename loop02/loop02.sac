@@ -16,6 +16,12 @@ use RTimer: all;
 #define VARIANT C
 #endif
 
+#ifndef INLINE
+#define LL_INLINE
+#else
+#define LL_INLINE inline
+#endif
+
 #define APPEND(v) Loop2_ ## v
 #define FULL(v) APPEND(v)
 #define LOOP FULL( VARIANT)
@@ -33,7 +39,7 @@ use RTimer: all;
  * However, since in Sac indexing starts with 0 rather than 1, all indices are 
  * decremented by 1!
  */
-
+LL_INLINE
 double[.] Loop2_C( int n, double[SIZE] v, double[SIZE] x)
 {
   ipntp = 0;

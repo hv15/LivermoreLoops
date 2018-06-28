@@ -15,6 +15,12 @@ use RTimer: all;
 #define VARIANT C
 #endif
 
+#ifndef INLINE
+#define LL_INLINE
+#else
+#define LL_INLINE inline
+#endif
+
 #define APPEND(v) Loop6_ ## v
 #define FULL(v) APPEND(v)
 #define LOOP FULL( VARIANT)
@@ -31,7 +37,7 @@ use RTimer: all;
 #define SIZE2 64
 #endif
 
-inline
+LL_INLINE
 double[.] Loop6_C( int n, double[SIZE] w, double[SIZE2,SIZE2] b)
 {
   for( i=1 ; i<n ; i++ ) {
@@ -42,7 +48,7 @@ double[.] Loop6_C( int n, double[SIZE] w, double[SIZE2,SIZE2] b)
   return w;
 }
 
-inline
+LL_INLINE
 double[.] Loop6_NAIVE( int n, double[SIZE] w, double[SIZE2,SIZE2] b)
 {
   for( i=1; i< n; i++) {
@@ -56,8 +62,7 @@ double[.] Loop6_NAIVE( int n, double[SIZE] w, double[SIZE2,SIZE2] b)
   return w;
 }
 
-
-inline
+LL_INLINE
 double[.] Loop6_TC( int n, double[SIZE] w, double[SIZE2,SIZE2] b)
 {
   for( i=1; i< n; i++) {
@@ -68,7 +73,7 @@ double[.] Loop6_TC( int n, double[SIZE] w, double[SIZE2,SIZE2] b)
   return w;
 }
 
-inline
+LL_INLINE
 double[.] Loop6_APL( int n, double[SIZE] w, double[SIZE2,SIZE2] b)
 {
   for( i=1; i< n; i++) {

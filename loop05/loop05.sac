@@ -16,6 +16,12 @@ use RTimer: all;
 #define VARIANT C
 #endif
 
+#ifndef INLINE
+#define LL_INLINE
+#else
+#define LL_INLINE inline
+#endif
+
 #define APPEND(v) Loop5_ ## v
 #define FULL(v) APPEND(v)
 #define LOOP FULL( VARIANT)
@@ -28,7 +34,7 @@ use RTimer: all;
 #define SIZE 1001
 #endif
 
-inline
+LL_INLINE
 double[.] Loop5_C( int n, double[SIZE] x, double[SIZE] y, double[SIZE] z)
 {
   for( i=1; i< n; i++) {

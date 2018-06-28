@@ -16,6 +16,12 @@ use RTimer: all;
 #define VARIANT C
 #endif
 
+#ifndef INLINE
+#define LL_INLINE
+#else
+#define LL_INLINE inline
+#endif
+
 #define APPEND(v) Loop8_ ## v
 #define FULL(v) APPEND(v)
 #define LOOP FULL( VARIANT)
@@ -32,7 +38,7 @@ use RTimer: all;
 #define SIZE2 5
 #endif
 
-inline
+LL_INLINE
 double[.,.], double[.,.], double[.,.]
 Loop8_C( int n, double[10] consts, double[SIZE1,SIZE2] u1,
                                    double[SIZE1,SIZE2] u2,
@@ -70,7 +76,7 @@ Loop8_C( int n, double[10] consts, double[SIZE1,SIZE2] u1,
   return (u1n,u2n,u3n);
 }
 
-inline
+LL_INLINE
 double[.,.], double[.,.], double[.,.]
 Loop8_NAIVE( int n, double[10] consts, double[SIZE1,SIZE2] u1,
                                        double[SIZE1,SIZE2] u2,
@@ -115,7 +121,7 @@ Loop8_NAIVE( int n, double[10] consts, double[SIZE1,SIZE2] u1,
   return (u1p,u2p,u3p);
 }
 
-inline
+LL_INLINE
 double[.,.], double[.,.], double[.,.]
 Loop8_NAIVE2( int n, double[10] consts, double[SIZE1,SIZE2] u1,
                                         double[SIZE1,SIZE2] u2,
@@ -166,7 +172,7 @@ Loop8_NAIVE2( int n, double[10] consts, double[SIZE1,SIZE2] u1,
   return (u1n,u2n,u3n);
 }
 
-inline
+LL_INLINE
 double[.,.], double[.,.], double[.,.]
 Loop8_APL( int n, double[10] consts, double[SIZE1,SIZE2] u1,
                                      double[SIZE1,SIZE2] u2,
