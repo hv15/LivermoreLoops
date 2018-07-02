@@ -46,7 +46,7 @@ use RTimer: all;
  * the values between x[n] and x[SIZE-1]!
  */
 LL_INLINE
-double[.] Loop1_APL1(int nolir, int n, double q, double r, double t, 
+double[.] Loop1_APL1(int nolir, int n, double q, double r, double t,
                         double[SIZE] y, double[SIZE] z)
 {
   val =  ( q + ( take([n], y) * ( r * take( [n], drop( [10], z))
@@ -108,14 +108,12 @@ int main ()
   printf( "Upper limit (n)      : %d\n", n);
 
   startRTimer( timer);
-  noLir = 0.0;
   for (i=0; i<rep; i++){
-    x = LOOP( i, n, q, r, t, y, z);
-    noLir += x[0];
+    y = LOOP( i, n, q, r, t, y, z);
   }
   stopRTimer( timer);
 
-  printf( "The sum of the first element is : %f\n", noLir);
+  printf( "The sum of the first element is : %f\n", sum (y));
 
   numFlops = tod(rep)*tod(n)*5.0;
 
