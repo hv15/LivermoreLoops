@@ -67,7 +67,7 @@ double[.] Loop1_TC1( int nolir, int n, double q, double r, double t,
 {
   return with {
            ( [0] <= [k] < [n]) : q + y[k] * (r*z[k+10] + t*z[k+11]);
-         } : genarray( [1001], tod(nolir));
+         } : genarray( [SIZE], tod(nolir));
 }
 
 LL_INLINE
